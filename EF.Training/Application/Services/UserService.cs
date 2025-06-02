@@ -16,13 +16,13 @@ public class UserService : IUserService
 
   public async Task<List<User>> GetAllUsersAsync()
   {
-    return await _userRepository.GetAllAsync();
+    return await _userRepository.GetAllUsersAsync();
   }
 
   public async Task<User> CreateUserAsync(CreateUserDto request)
   {
     User user = new(request.Name, request.Age);
-    await _userRepository.AddAsync(user);
+    await _userRepository.CreateUserAsync(user);
     return user;
   }
 }

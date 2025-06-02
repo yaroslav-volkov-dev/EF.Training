@@ -13,12 +13,12 @@ public class UserRepository : IUserRepository
     _context = context;
   }
 
-  public async Task<List<User>> GetAllAsync()
+  public async Task<List<User>> GetAllUsersAsync()
   {
     return await _context.Users.ToListAsync();
   }
 
-  public async Task AddAsync(User user)
+  public async Task CreateUserAsync(User user)
   {
     await _context.Users.AddAsync(user);
     await _context.SaveChangesAsync();

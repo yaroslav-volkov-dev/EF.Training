@@ -4,6 +4,6 @@ namespace EF.Training.Infrastructure.Interfaces;
 
 public interface IUserRepository
 {
-  Task<List<User>> GetAllAsync();
-  Task AddAsync(User user);
+  Task<List<User>> GetAllUsersAsync();
+  Task CreateUserAsync(User user);
 }
