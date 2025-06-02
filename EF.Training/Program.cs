@@ -1,33 +1,27 @@
-﻿using EF.Training.Services;
+﻿using EF.Training.Application.Interfaces;
+using EF.Training.Application.Services;
+using EF.Training.Infrastructure;
+using EF.Training.Infrastructure.Interfaces;
+using EF.Training.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
 
-class Program 
+internal class Program
 {
-    static Task Main()
-    {
-        
-        UserService service = new ();
+  public static void Main(string[] args)
+  {
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        while (true)
-        {
-            Console.WriteLine("Select an action");
+    builder.Services.AddDbContext<ApplicationContext>(options =>
+      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            string? input = Console.ReadLine();
+    builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-            switch (input)
-            {
-                case "GET":
-                    service.GetAllUsers();
-                    break;
-                case "POST":
-                    service.AddUser();
-                    break;
-                case "DELETE":
-                    service.DeleteUser();
-                    break;
-                default:
-                    Console.WriteLine("Something went wrong");
-                    break;
-            }
-        }
-    }
+    builder.Services.AddControllers();
+
+    WebApplication app = builder.Build();
+
+    app.MapControllers();
+    app.Run();
+  }
 }
