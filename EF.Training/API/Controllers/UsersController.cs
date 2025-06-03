@@ -17,17 +17,17 @@ public class UsersController : ControllerBase
   }
 
   [HttpGet]
-  public async Task<ActionResult<List<User>>> GetAllUsers()
+  public async Task<List<User>> GetAllUsers()
   {
     List<User> users = await _userService.GetAllUsersAsync();
-    return Ok(users);
+    return users;
   }
 
   [HttpPost]
-  public async Task<ActionResult<User>> CreateUser(CreateUserDto request)
+  public async Task<User> CreateUser(CreateUserDto request)
   {
     User user = await _userService.CreateUserAsync(request);
 
-    return Ok(user);
+    return user;
   }
 }

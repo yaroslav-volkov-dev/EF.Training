@@ -14,7 +14,7 @@ public class User
     Age = age;
   }
 
-  public int Id { get; set; }
+  public int Id { get; private set; }
   public string Name { get; private set; }
   public int Age { get; private set; }
   public List<Company> Companies { get; private set; } = [];
