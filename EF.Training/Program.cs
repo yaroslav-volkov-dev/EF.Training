@@ -16,6 +16,8 @@ internal class Program
 
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IOrdersService, OrdersService>();
+    builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
 
     builder.Services.AddControllers();
 

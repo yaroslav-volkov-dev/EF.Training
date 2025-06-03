@@ -21,20 +21,19 @@ public class OrdersRepository : IOrdersRepository
       .ToListAsync();
   }
 
-  public async Task<Order> CreateOrderAsync(int userId, string name, string description)
+  public async Task<Order> CreateOrderAsync(Order order)
   {
-    bool isUserExist = await _context.Users.AnyAsync(u => u.Id == userId);
+    bool isUserExist = await _context.Users.AnyAsync(u => u.Id == order.UserId);
 
     if (!isUserExist)
     {
       throw new ArgumentException("User does not exist.");
     }
 
-    Order newOrder = new(userId, description, name);
-    _context.Orders.Add(newOrder);
+    _context.Orders.Add(order);
     await _context.SaveChangesAsync();
 
-    return newOrder;
+    return order;
   }
 
   public async Task<bool> DeleteOrderAsync(int id)

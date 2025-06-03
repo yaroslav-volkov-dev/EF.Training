@@ -21,8 +21,6 @@ public class UserService : IUserService
 
   public async Task<User> CreateUserAsync(CreateUserDto request)
   {
-    User user = new(request.Name, request.Age);
-    await _userRepository.CreateUserAsync(user);
-    return user;
+    return await _userRepository.CreateUserAsync(new User(request.Name, request.Age));
   }
 }
