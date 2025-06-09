@@ -1,29 +1,21 @@
-﻿using EF.Training.Domain.Entities;
-using EF.Training.Infrastructure.Interfaces;
+﻿using EF.Training.Application.Interfaces;
+using EF.Training.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EF.Training.Infrastructure.Repositories;
 
 public class OrdersRepository : IOrdersRepository
 {
-  private readonly ApplicationContext _context;
+  private readonly IApplicationContext _context;
 
-  public OrdersRepository(ApplicationContext context)
+  public OrdersRepository(IApplicationContext context)
   {
     _context = context;
   }
 
-  public async Task<List<Order>> GetOrdersAsync(int pageNumber, int pageSize)
+  public async Task<Order> CreateOneAsync(Order order, CancellationToken cancellationToken)
   {
-    return await _context.Orders
-      .Skip((pageNumber - 1) * pageSize)
-      .Take(pageSize)
-      .ToListAsync();
-  }
-
-  public async Task<Order> CreateOrderAsync(Order order)
-  {
-    bool isUserExist = await _context.Users.AnyAsync(u => u.Id == order.UserId);
+    bool isUserExist = await _context.Users.AnyAsync(u => u.Id == order.UserId, cancellationToken);
 
     if (!isUserExist)
     {
@@ -31,14 +23,23 @@ public class OrdersRepository : IOrdersRepository
     }
 
     _context.Orders.Add(order);
-    await _context.SaveChangesAsync();
+    await _context.SaveChangesAsync(cancellationToken);
 
     return order;
   }
 
-  public async Task<bool> DeleteOrderAsync(int id)
+  public async Task<List<Order>> GetAllAsync(int pageNumber, int pageSize, CancellationToken cancellationToken)
   {
-    Order? order = await _context.Orders.FindAsync(id);
+    return await _context.Orders
+      .Include(order => order.User)
+      .Skip((pageNumber - 1) * pageSize)
+      .Take(pageSize)
+      .ToListAsync(cancellationToken);
+  }
+
+  public async Task<bool> DeleteOneAsync(int id, CancellationToken cancellationToken)
+  {
+    Order? order = await _context.Orders.FindAsync(id, cancellationToken);
 
     if (order is null)
     {
@@ -46,14 +47,14 @@ public class OrdersRepository : IOrdersRepository
     }
 
     _context.Orders.Remove(order);
-    await _context.SaveChangesAsync();
+    await _context.SaveChangesAsync(cancellationToken);
 
     return true;
   }
 
-  public async Task<Order> UpdateOrderAsync(Order updatedOrder)
+  public async Task<Order> UpdateOneAsync(Order updatedOrder, CancellationToken cancellationToken)
   {
-    Order? order = await _context.Orders.FindAsync(updatedOrder.Id);
+    Order? order = await _context.Orders.FindAsync(updatedOrder.Id, cancellationToken);
 
     if (order is null)
     {
@@ -64,7 +65,7 @@ public class OrdersRepository : IOrdersRepository
     order.UpdateDescription(updatedOrder.Description);
     order.ChangeUser(updatedOrder.UserId);
 
-    await _context.SaveChangesAsync();
+    await _context.SaveChangesAsync(cancellationToken);
 
     return order;
   }

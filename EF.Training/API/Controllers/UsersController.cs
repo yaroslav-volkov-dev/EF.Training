@@ -1,12 +1,12 @@
 ﻿using EF.Training.Application.DTO;
 using EF.Training.Application.Interfaces;
-using EF.Training.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EF.Training.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/users")]
+[ApiVersion("1.0")]
 public class UsersController : ControllerBase
 {
   private readonly IUserService _userService;
@@ -17,16 +17,14 @@ public class UsersController : ControllerBase
   }
 
   [HttpGet]
-  public async Task<List<User>> GetAllUsers()
+  public async Task<List<UserResponseDto>> GetAllUsers(CancellationToken cancellationToken)
   {
-    return await _userService.GetAllUsersAsync();
+    return await _userService.GetAllAsync(cancellationToken);
   }
 
   [HttpPost]
-  public async Task<User> CreateUser(CreateUserDto request)
+  public async Task<UserResponseDto> CreateUser(CreateUserDto request, CancellationToken cancellationToken)
   {
-    User user = await _userService.CreateUserAsync(request);
-
-    return user;
+    return await _userService.CreateOneAsync(request, cancellationToken);
   }
 }
