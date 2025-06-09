@@ -1,33 +1,48 @@
-﻿using EF.Training.Services;
+﻿using EF.Training.Application.Interfaces;
+using EF.Training.Application.Mappings;
+using EF.Training.Application.Services;
+using EF.Training.Infrastructure.Data;
+using EF.Training.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.EntityFrameworkCore;
 
-class Program 
+namespace EF.Training;
+
+internal class Program
 {
-    static Task Main()
+  public static void Main(string[] args)
+  {
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+    builder.Services.AddDbContext<ApplicationContext>(options =>
+      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    builder.Services.AddApiVersioning(options =>
     {
-        
-        UserService service = new ();
+      options.DefaultApiVersion = new ApiVersion(1, 0);
+      options.AssumeDefaultVersionWhenUnspecified = true;
+      options.ReportApiVersions = true;
 
-        while (true)
-        {
-            Console.WriteLine("Select an action");
+      options.ApiVersionReader = ApiVersionReader.Combine(
+        new QueryStringApiVersionReader("api-version"),
+        new HeaderApiVersionReader("X-Version"),
+        new UrlSegmentApiVersionReader()
+      );
+    });
 
-            string? input = Console.ReadLine();
+    builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IOrdersService, OrdersService>();
+    builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+    builder.Services.AddScoped<IApplicationContext, ApplicationContext>();
+    builder.Services.AddAutoMapper(typeof(OrdersMappingProfile));
+    builder.Services.AddAutoMapper(typeof(UserMappingProfile));
 
-            switch (input)
-            {
-                case "GET":
-                    service.GetAllUsers();
-                    break;
-                case "POST":
-                    service.AddUser();
-                    break;
-                case "DELETE":
-                    service.DeleteUser();
-                    break;
-                default:
-                    Console.WriteLine("Something went wrong");
-                    break;
-            }
-        }
-    }
+    builder.Services.AddControllers();
+
+    WebApplication app = builder.Build();
+    app.MapControllers();
+    app.Run();
+  }
 }
